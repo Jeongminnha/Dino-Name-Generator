@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dino Naming Generator</title>
+  <style>
+    :root {
+      --leaf: #2f9e44;
+      --leaf-dark: #087f5b;
+      --lime: #b2f24c;
+      --sun: #ffd43b;
+      --melon: #ff8787;
+      --ink: #183126;
+      --paper: #fff9db;
+      --white: #ffffff;
+      --shadow: rgba(24, 49, 38, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: var(--ink);
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255, 212, 59, 0.65) 0 9%, transparent 10%),
+        radial-gradient(circle at 86% 24%, rgba(255, 135, 135, 0.55) 0 8%, transparent 9%),
+        radial-gradient(circle at 28% 88%, rgba(178, 242, 76, 0.55) 0 10%, transparent 11%),
+        linear-gradient(135deg, #d8f5a2 0%, #96f2d7 46%, #ffec99 100%);
+    }
+
+    main {
+      width: min(100%, 460px);
+      position: relative;
+    }
+
+    .generator {
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+      border: 3px solid var(--ink);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 10px 10px 0 var(--shadow);
+    }
+
+    .generator::before,
+    .generator::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .generator::before {
+      width: 120px;
+      height: 120px;
+      right: -44px;
+      top: -42px;
+      background: repeating-linear-gradient(
+        45deg,
+        var(--lime) 0 12px,
+        var(--sun) 12px 24px
+      );
+    }
+
+    .generator::after {
+      width: 86px;
+      height: 86px;
+      left: -32px;
+      bottom: -30px;
+      background: repeating-linear-gradient(
+        -45deg,
+        #74c0fc 0 10px,
+        var(--melon) 10px 20px
+      );
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 9vw, 3.2rem);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #345849;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+
+    input {
+      width: 100%;
+      min-height: 52px;
+      padding: 12px 14px;
+      border: 3px solid var(--ink);
+      border-radius: 8px;
+      outline: none;
+      background: var(--white);
+      color: var(--ink);
+      font: inherit;
+      font-size: 1.1rem;
+      box-shadow: 4px 4px 0 rgba(24, 49, 38, 0.16);
+    }
+
+    input:focus {
+      border-color: var(--leaf-dark);
+      box-shadow: 0 0 0 4px rgba(178, 242, 76, 0.65), 4px 4px 0 rgba(24, 49, 38, 0.16);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      min-height: 48px;
+      border: 3px solid var(--ink);
+      border-radius: 8px;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 4px 4px 0 rgba(24, 49, 38, 0.18);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    button:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 5px 5px 0 rgba(24, 49, 38, 0.18);
+    }
+
+    button:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 rgba(24, 49, 38, 0.18);
+    }
+
+    .primary {
+      background: var(--lime);
+    }
+
+    .secondary {
+      background: #ffa8a8;
+    }
+
+    .result-wrap {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 18px;
+    }
+
+    .result {
+      min-height: 62px;
+      display: grid;
+      align-items: center;
+      padding: 12px 14px;
+      border: 3px dashed var(--leaf-dark);
+      border-radius: 8px;
+      background: #f4fce3;
+      font-size: clamp(1.35rem, 6vw, 2rem);
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .copy {
+      width: 58px;
+      min-height: 58px;
+      background: var(--sun);
+      font-size: 1.2rem;
+    }
+
+    .copy:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      transform: none;
+      box-shadow: 4px 4px 0 rgba(24, 49, 38, 0.18);
+    }
+
+    .error {
+      min-height: 22px;
+      margin-top: 10px;
+      color: #c92a2a;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 16px;
+      }
+
+      .generator {
+        padding: 22px;
+        box-shadow: 7px 7px 0 var(--shadow);
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="generator" aria-labelledby="title">
+      <div class="content">
+        <h1 id="title">Dino Name Party</h1>
+        <p class="subtitle">Type your English name and hatch one funny dino name.</p>
+
+        <form id="nameForm">
+          <label for="nameInput">English name</label>
+          <input id="nameInput" name="nameInput" type="text" autocomplete="given-name" maxlength="32" placeholder="Alex">
+
+          <div class="actions">
+            <button class="primary" type="submit">Generate</button>
+            <button class="secondary" id="tryAgainBtn" type="button">Try Again</button>
+          </div>
+        </form>
+
+        <div class="result-wrap" aria-live="polite">
+          <div class="result" id="result">Your dino name</div>
+          <button class="copy" id="copyBtn" type="button" title="Copy dinosaur name" aria-label="Copy dinosaur name" disabled>Copy</button>
+        </div>
+
+        <div class="error" id="error" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const endings = ["saurus", "raptor", "ceratops", "ratops", "teryx", "don", "mimus", "venator", "titan", "draco"];
+    const connectors = ["", "i", "o", "a"];
+
+    const form = document.getElementById("nameForm");
+    const input = document.getElementById("nameInput");
+    const result = document.getElementById("result");
+    const error = document.getElementById("error");
+    const tryAgainBtn = document.getElementById("tryAgainBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    let currentName = "";
+
+    function cleanName(value) {
+      const lettersOnly = value.trim().replace(/[^a-zA-Z]/g, "");
+      if (!lettersOnly) return "";
+      return lettersOnly.charAt(0).toUpperCase() + lettersOnly.slice(1).toLowerCase();
+    }
+
+    function pickRandom(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function softenBase(base, ending) {
+      const last = base.slice(-1).toLowerCase();
+      const first = ending.charAt(0);
+
+      if (last === "e" && !"aeiou".includes(first)) {
+        return base.slice(0, -1) + "i";
+      }
+
+      return base;
+    }
+
+    function chooseConnector(base, ending) {
+      const last = base.slice(-1).toLowerCase();
+      const first = ending.charAt(0);
+      const vowelEnd = "aeiou".includes(last);
+      const vowelStart = "aeiou".includes(first);
+      const naturalChoices = [];
+
+      if (vowelEnd && vowelStart) naturalChoices.push("");
+      if (vowelEnd && !vowelStart) naturalChoices.push("", "i", "a");
+      if (!vowelEnd && vowelStart) naturalChoices.push("", "o", "i");
+      if (!vowelEnd && !vowelStart) naturalChoices.push("i", "o", "a", "");
+
+      return pickRandom(naturalChoices.filter((letter) => connectors.includes(letter)));
+    }
+
+    function makeDinoName() {
+      const base = cleanName(input.value);
+
+      if (!base) {
+        currentName = "";
+        result.textContent = "Your dino name";
+        copyBtn.disabled = true;
+        error.textContent = "Enter a name with English letters.";
+        return;
+      }
+
+      const ending = pickRandom(endings);
+      const dinoBase = softenBase(base, ending);
+      const connector = chooseConnector(dinoBase, ending);
+
+      currentName = `${dinoBase}${connector}${ending}`;
+      result.textContent = currentName;
+      copyBtn.disabled = false;
+      error.textContent = "";
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      makeDinoName();
+    });
+
+    tryAgainBtn.addEventListener("click", makeDinoName);
+
+    copyBtn.addEventListener("click", async () => {
+      if (!currentName) return;
+
+      try {
+        await navigator.clipboard.writeText(currentName);
+        copyBtn.textContent = "Done";
+        setTimeout(() => {
+          copyBtn.textContent = "Copy";
+        }, 900);
+      } catch {
+        const temporaryInput = document.createElement("textarea");
+        temporaryInput.value = currentName;
+        temporaryInput.setAttribute("readonly", "");
+        temporaryInput.style.position = "fixed";
+        temporaryInput.style.left = "-9999px";
+        document.body.appendChild(temporaryInput);
+        temporaryInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(temporaryInput);
+        copyBtn.textContent = "Done";
+        setTimeout(() => {
+          copyBtn.textContent = "Copy";
+        }, 900);
+      }
+    });
+  </script>
+</body>
+</html>
